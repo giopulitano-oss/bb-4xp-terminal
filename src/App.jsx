@@ -576,6 +576,13 @@ export default function App() {
   const { loading: fbLoading } = useLoadUserData({ uid: user?.uid, applyState });
   const { saveStatus } = useFirestoreSync({ uid: user?.uid, getState, isReady: !fbLoading });
 
+  const handleReset = () => {
+    if (window.confirm("Réinitialiser toutes les données? Cette action est irréversible.")) {
+      import("./hooks/useFirestoreSync").then(m => m.resetLocalStorage());
+      window.location.reload();
+    }
+  };
+
   // ── COMPUTED ──
   const TASSETS = pr.reduce((a, p) => a + p.v, 0);
   const LTD = pr.reduce((a, p) => a + p.d, 0);
@@ -1224,7 +1231,17 @@ export default function App() {
               fontSize: 6,
               fontWeight: 600,
               cursor: "pointer"
-            }}>IMPORT</button> <button onClick={signOut} style={{
+            }}>IMPORT</button> <button onClick={handleReset} style={{
+              padding: "2px 6px",
+              border: `1px solid ${C.am}44`,
+              borderRadius: 2,
+              background: C.am + "12",
+              color: C.am,
+              fontFamily: M,
+              fontSize: 6,
+              fontWeight: 600,
+              cursor: "pointer"
+            }}>RESET</button> <button onClick={signOut} style={{
               padding: "2px 6px",
               border: `1px solid ${C.rd}44`,
               borderRadius: 2,

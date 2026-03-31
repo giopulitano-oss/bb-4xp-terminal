@@ -1,4 +1,4 @@
-const CACHE_NAME = "4xp-terminal-v1";
+const CACHE_NAME = "4xp-terminal-v2";
 const PRECACHE = [
   "/",
   "/index.html",
