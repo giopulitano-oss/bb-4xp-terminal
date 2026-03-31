@@ -1236,12 +1236,13 @@ export default function App() {
               cursor: "pointer"
             }}>LOGOUT</button></div> <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
             <div style={{
-              width: 6, height: 6, borderRadius: "50%",
+              width: 7, height: 7, borderRadius: "50%",
               background: saveStatus === "saved" ? C.g : saveStatus === "saving" || saveStatus === "pending" ? C.am : saveStatus === "error" ? C.rd : C.ft,
-              transition: "background 0.3s"
-            }} />
+              transition: "background 0.3s",
+              boxShadow: saveStatus === "error" ? `0 0 4px ${C.rd}` : saveStatus === "saved" ? `0 0 4px ${C.g}` : "none"
+            }} title={saveStatus === "saved" ? "Sauvegardé" : saveStatus === "saving" ? "Sauvegarde..." : saveStatus === "pending" ? "En attente..." : saveStatus === "error" ? "Erreur de sauvegarde" : "Prêt"} />
             <span style={{ fontSize: 6, color: C.ft, fontFamily: M }}>
-              {user?.email?.split("@")[0]}
+              {user?.email?.split("@")[0]} {saveStatus === "error" ? "⚠" : ""}
             </span>
           </div> <input id="_4xp_import" type="file" accept=".json" onChange={importJSON} style={{
             display: "none"

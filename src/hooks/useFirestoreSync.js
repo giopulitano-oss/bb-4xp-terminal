@@ -1,47 +1,84 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { saveUserState } from "../firebase/firestoreService";
 
+const LS_KEY = "4xp_terminal_backup";
+
+function saveToLocalStorage(state) {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify(state));
+  } catch (_) { /* quota exceeded — ignore */ }
+}
+
+export function loadFromLocalStorage() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (_) {
+    return null;
+  }
+}
+
 export default function useFirestoreSync({ uid, getState, isReady }) {
-  const [saveStatus, setSaveStatus] = useState("idle"); // idle | pending | saving | saved | error
+  const [saveStatus, setSaveStatus] = useState("idle");
   const timerRef = useRef(null);
-  const prevStateRef = useRef(null);
-  const isFirstRender = useRef(true);
+  const prevJsonRef = useRef(null);
+  const getStateRef = useRef(getState);
+  const mountedRef = useRef(true);
 
-  const stableGetState = useCallback(getState, [getState]);
+  // Keep getState ref current without triggering effects
+  useEffect(() => {
+    getStateRef.current = getState;
+  });
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  // Sync effect — runs on every render but only saves when state changed
   useEffect(() => {
     if (!uid || !isReady) return;
 
-    // Skip first render (initial load from Firestore)
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      prevStateRef.current = JSON.stringify(stableGetState());
+    const currentState = getStateRef.current();
+    const currentJson = JSON.stringify(currentState);
+
+    // First call: snapshot current state, don't save
+    if (prevJsonRef.current === null) {
+      prevJsonRef.current = currentJson;
       return;
     }
 
-    const currentState = JSON.stringify(stableGetState());
-    if (currentState === prevStateRef.current) return;
+    // No changes — nothing to do
+    if (currentJson === prevJsonRef.current) return;
 
-    prevStateRef.current = currentState;
+    prevJsonRef.current = currentJson;
+
+    // Immediately save to localStorage (instant, no network needed)
+    saveToLocalStorage(currentState);
+
     setSaveStatus("pending");
 
     if (timerRef.current) clearTimeout(timerRef.current);
 
     timerRef.current = setTimeout(async () => {
+      if (!mountedRef.current) return;
       setSaveStatus("saving");
       try {
-        await saveUserState(uid, stableGetState());
-        setSaveStatus("saved");
-        setTimeout(() => setSaveStatus("idle"), 2000);
+        await saveUserState(uid, getStateRef.current());
+        if (mountedRef.current) {
+          setSaveStatus("saved");
+          setTimeout(() => {
+            if (mountedRef.current) setSaveStatus("idle");
+          }, 2000);
+        }
       } catch (err) {
         console.error("Firestore save error:", err);
-        setSaveStatus("error");
+        if (mountedRef.current) setSaveStatus("error");
       }
-    }, 2000);
-
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
+    }, 1500);
   });
 
   return { saveStatus };
