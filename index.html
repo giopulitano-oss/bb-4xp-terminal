@@ -2,8 +2,17 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>BB 4XP Terminal v9</title>
+  <!-- PWA -->
+  <link rel="manifest" href="/bb-4xp-terminal/manifest.json" />
+  <meta name="theme-color" content="#0a0e14" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="4XP Terminal" />
+  <link rel="apple-touch-icon" href="/bb-4xp-terminal/icon-192.png" />
+  <link rel="icon" type="image/svg+xml" href="/bb-4xp-terminal/icon.svg" />
+  <!-- Fonts -->
   <link
     href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap"
     rel="stylesheet"
@@ -17,5 +26,12 @@
   </div>
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/bb-4xp-terminal/sw.js").catch(() => {});
+      });
+    }
+  </script>
 </body>
 </html>
