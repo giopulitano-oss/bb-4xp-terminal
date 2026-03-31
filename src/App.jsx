@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip,
   ResponsiveContainer, Cell, PieChart, Pie, Legend, Area, AreaChart,
@@ -16,8 +16,12 @@ import {
   Tag as Tg, Heading as Hd, EditableCell as EC,
   SelectCell as SC, KPI, CustomTooltip as Tp,
 } from './components/shared';
+import { AuthContext } from './firebase/AuthContext';
+import useFirestoreSync from './hooks/useFirestoreSync';
+import useLoadUserData from './hooks/useLoadUserData';
 
 export default function App() {
+  const { user, signOut } = useContext(AuthContext);
   const _S = typeof window !== "undefined" && window._4XP_STATE ? window._4XP_STATE : null;
   const [tab, setTab] = useState("dash");
   const [cr, setCr] = useState(_S ? _S.cr : 7);
@@ -540,6 +544,37 @@ export default function App() {
     reader.readAsText(file);
     e.target.value = "";
   };
+
+  // ── FIREBASE SYNC ──
+  const applyState = useCallback((d) => {
+    if (d.pr) setPr(d.pr);
+    if (d.op) setOp(d.op);
+    if (d.std !== undefined) setStd(d.std);
+    if (d.stdRate !== undefined) setStdRate(d.stdRate);
+    if (d.fundInv) setFundInv(d.fundInv);
+    if (d.fundingInv) setFundingInv(d.fundingInv);
+    if (d.pipeInv) setPipeInv(d.pipeInv);
+    if (d.cr !== undefined) setCr(d.cr);
+    if (d.em !== undefined) setEm(d.em);
+    if (d.om !== undefined) setOm(d.om);
+    if (d.ld !== undefined) setLd(d.ld);
+    if (d.projDefAppr !== undefined) setProjDefAppr(d.projDefAppr);
+    if (d.projDefRate !== undefined) setProjDefRate(d.projDefRate);
+    if (d.projAmortYrs !== undefined) setProjAmortYrs(d.projAmortYrs);
+    if (d.cfTaxRate !== undefined) setCfTaxRate(d.cfTaxRate);
+    if (d.cfDistTarget !== undefined) setCfDistTarget(d.cfDistTarget);
+    if (d.acqs) setAcqs(d.acqs);
+    if (d.devs) setDevs(d.devs);
+    if (d.entities) setEntities(d.entities);
+    if (d.orgClA) setOrgClA(d.orgClA);
+    if (d.orgClB) setOrgClB(d.orgClB);
+    if (d.orgCA) setOrgCA(d.orgCA);
+    if (d.orgReSubs) setOrgReSubs(d.orgReSubs);
+    if (d.orgOpcos) setOrgOpcos(d.orgOpcos);
+  }, []);
+
+  const { loading: fbLoading } = useLoadUserData({ uid: user?.uid, applyState });
+  const { saveStatus } = useFirestoreSync({ uid: user?.uid, getState, isReady: !fbLoading });
 
   // ── COMPUTED ──
   const TASSETS = pr.reduce((a, p) => a + p.v, 0);
@@ -1189,7 +1224,26 @@ export default function App() {
               fontSize: 6,
               fontWeight: 600,
               cursor: "pointer"
-            }}>IMPORT</button></div> <input id="_4xp_import" type="file" accept=".json" onChange={importJSON} style={{
+            }}>IMPORT</button> <button onClick={signOut} style={{
+              padding: "2px 6px",
+              border: `1px solid ${C.rd}44`,
+              borderRadius: 2,
+              background: C.rd + "12",
+              color: C.rd,
+              fontFamily: M,
+              fontSize: 6,
+              fontWeight: 600,
+              cursor: "pointer"
+            }}>LOGOUT</button></div> <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <div style={{
+              width: 6, height: 6, borderRadius: "50%",
+              background: saveStatus === "saved" ? C.g : saveStatus === "saving" || saveStatus === "pending" ? C.am : saveStatus === "error" ? C.rd : C.ft,
+              transition: "background 0.3s"
+            }} />
+            <span style={{ fontSize: 6, color: C.ft, fontFamily: M }}>
+              {user?.email?.split("@")[0]}
+            </span>
+          </div> <input id="_4xp_import" type="file" accept=".json" onChange={importJSON} style={{
             display: "none"
           }} /></div></div> <div style={{
         display: "flex",
