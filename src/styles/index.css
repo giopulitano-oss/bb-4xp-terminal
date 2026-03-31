@@ -1,0 +1,70 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body, #root {
+  width: 100%;
+  min-height: 100vh;
+  background: #0A0C10;
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: #111318; }
+::-webkit-scrollbar-thumb { background: #282D3A; border-radius: 3px; }
+
+input[type="range"] {
+  -webkit-appearance: none;
+  background: #282D3A;
+  border-radius: 2px;
+  outline: none;
+  height: 3px;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: #00E676;
+  cursor: pointer;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: #00E676;
+  cursor: pointer;
+  border: none;
+}
+
+select { -webkit-appearance: none; appearance: none; }
+
+#loading {
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: #0A0C10;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 9999;
+  font-family: 'JetBrains Mono', monospace;
+  color: #00E676;
+  transition: opacity 0.5s;
+}
+#loading .spinner {
+  width: 40px; height: 40px;
+  border: 3px solid #282D3A;
+  border-top: 3px solid #00E676;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+#error-box {
+  display: none;
+  position: fixed; top: 20px; right: 20px;
+  max-width: 400px;
+  background: #171A22;
+  border: 1px solid #FF3D5744;
+  border-radius: 8px;
+  padding: 16px;
+  z-index: 9998;
+  font-family: 'JetBrains Mono', monospace;
+  color: #FF3D57;
+  font-size: 12px;
+}
