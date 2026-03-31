@@ -24,21 +24,15 @@ export function AuthProvider({ children }) {
     const unsub = onAuthStateChanged(auth, async (fbUser) => {
       if (fbUser) {
         setUser(fbUser);
+        setAuthorized(true);
         try {
-          const allowed = await loadAllowedEmails();
-          // If no whitelist exists yet, allow all authenticated users
-          const isAllowed = allowed.length === 0 || allowed.includes(fbUser.email);
-          setAuthorized(isAllowed);
-          if (isAllowed) {
-            await saveUserProfile(fbUser.uid, {
-              email: fbUser.email,
-              displayName: fbUser.displayName || fbUser.email,
-              lastLogin: new Date().toISOString(),
-            });
-          }
+          await saveUserProfile(fbUser.uid, {
+            email: fbUser.email,
+            displayName: fbUser.displayName || fbUser.email,
+            lastLogin: new Date().toISOString(),
+          });
         } catch {
-          // If config doc doesn't exist, allow access
-          setAuthorized(true);
+          // Profile save failed — non-blocking
         }
       } else {
         setUser(null);
