@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { loadUserState } from "../firebase/firestoreService";
 import { loadFromLocalStorage } from "./useFirestoreSync";
 
+const LOAD_TIMEOUT_MS = 5000;
+
 export default function useLoadUserData({ uid, applyState }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,19 +17,25 @@ export default function useLoadUserData({ uid, applyState }) {
     let cancelled = false;
 
     async function load() {
+      // Race Firestore load against a timeout
       try {
-        const data = await loadUserState(uid);
+        const data = await Promise.race([
+          loadUserState(uid),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("timeout")), LOAD_TIMEOUT_MS)
+          ),
+        ]);
         if (!cancelled && data) {
           applyState(data);
           setLoading(false);
           return;
         }
       } catch (err) {
-        console.warn("Firestore load failed, trying localStorage:", err);
+        console.warn("Firestore load failed or timed out, trying localStorage:", err.message);
         if (!cancelled) setError(err.message);
       }
 
-      // Fallback: load from localStorage if Firestore failed or returned nothing
+      // Fallback: load from localStorage
       if (!cancelled) {
         const local = loadFromLocalStorage();
         if (local) {

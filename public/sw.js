@@ -1,7 +1,7 @@
 const CACHE_NAME = "4xp-terminal-v1";
 const PRECACHE = [
-  "/bb-4xp-terminal/",
-  "/bb-4xp-terminal/index.html",
+  "/",
+  "/index.html",
 ];
 
 // Install — precache shell

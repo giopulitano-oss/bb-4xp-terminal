@@ -21,19 +21,16 @@ export function AuthProvider({ children }) {
   const [authError, setAuthError] = useState(null);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (fbUser) => {
+    const unsub = onAuthStateChanged(auth, (fbUser) => {
       if (fbUser) {
         setUser(fbUser);
         setAuthorized(true);
-        try {
-          await saveUserProfile(fbUser.uid, {
-            email: fbUser.email,
-            displayName: fbUser.displayName || fbUser.email,
-            lastLogin: new Date().toISOString(),
-          });
-        } catch {
-          // Profile save failed — non-blocking
-        }
+        // Save profile in background — don't block auth flow
+        saveUserProfile(fbUser.uid, {
+          email: fbUser.email,
+          displayName: fbUser.displayName || fbUser.email,
+          lastLogin: new Date().toISOString(),
+        }).catch(() => {});
       } else {
         setUser(null);
         setAuthorized(false);
