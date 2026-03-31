@@ -1,0 +1,25 @@
+{
+  "name": "BB 4XP Terminal",
+  "short_name": "4XP Terminal",
+  "description": "Bloomberg Quantum — 4XP Real Estate Terminal CIO",
+  "start_url": "/bb-4xp-terminal/",
+  "scope": "/bb-4xp-terminal/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a0e14",
+  "theme_color": "#0a0e14",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
